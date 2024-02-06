@@ -1,4 +1,6 @@
 package com.employeecrud.service;
+import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -40,12 +42,24 @@ public class EmployeeServiceImpl implements EmployeeService {
 		  employeeDAO.addEmployeeSkills(employeeSkills);
 		
 	}
-
+	
 	@Override
-	public void updateEmployeeSkills(EmployeeSkills employeeSkills) {
-		 employeeDAO.updateEmployeeSkills(employeeSkills);
-		
-	}
+	    public void updateEmployeeSkills(EmployeeSkills employeeSkills) {
+			Set<String> existingSkills = getEmployeeSkillsByEmployeeId(employeeSkills.getEmployeeId());
+			Set<String> skillsToAdd = new HashSet<>(employeeSkills.getEmployeeSkills());
+			Set<String> skillsToDelete = new HashSet<>(existingSkills);
+			skillsToDelete.removeAll(skillsToAdd);
+			for (String skill : skillsToDelete) {
+			    deleteEmployeeSkill(employeeSkills.getEmployeeId(), skill);
+			}
+			addEmployeeSkills(employeeSkills);
+			 employeeDAO.updateEmployeeSkills(employeeSkills);
+	    }
+
+
+	private void deleteEmployeeSkill(int employeeId, String skill) {
+		employeeDAO.deleteEmployeeSkills(employeeId, skill);
+}
 
 	@Override
 	public void deleteEmployeeSkills(int id) {

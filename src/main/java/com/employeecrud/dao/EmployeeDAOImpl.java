@@ -1,21 +1,21 @@
-	package com.employeecrud.dao;
+package com.employeecrud.dao;
 	
-	import java.sql.Connection;
-	import java.sql.PreparedStatement;
-	import java.sql.ResultSet;
-	import java.sql.SQLException;
-	import java.sql.Statement;
-	import java.util.ArrayList;
-	import java.util.Arrays;
-	import java.util.HashMap;
-	import java.util.HashSet;
-	import java.util.List;
-	import java.util.Map;
-	import java.util.Set;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 	
-	import com.employeecrud.model.Employee;
-	import com.employeecrud.model.EmployeeSkills;
-	import com.employeecrud.util.DBUtil;
+import com.employeecrud.model.Employee;
+import com.employeecrud.model.EmployeeSkills;
+import com.employeecrud.util.DBUtil;
 	
 	public class EmployeeDAOImpl implements EmployeeDAO {
 		int generateId;
@@ -161,32 +161,16 @@
 	    
 	    @Override
 	    public void updateEmployeeSkills(EmployeeSkills employeeSkills) {
-	        try (Connection connection = DBUtil.getConnection()) {
-	            Set<String> existingSkills = getEmployeeSkillsByEmployeeId(employeeSkills.getEmployeeId());
-	            Set<String> skillsToAdd = new HashSet<>(employeeSkills.getEmployeeSkills());
-	            skillsToAdd.removeAll(existingSkills);
-	            if (!skillsToAdd.isEmpty()) {
-	                try (PreparedStatement insertStatement = connection.prepareStatement(INSERT_EMPLOYEESKILL)) {
-	                    for (String skill : skillsToAdd) {
-	                        insertStatement.setString(1, skill);
-	                        insertStatement.setInt(2, employeeSkills.getEmployeeId());
-	                        insertStatement.addBatch();
-	                    }
-	                    insertStatement.executeBatch();
-	                }
-	            }
-	            Set<String> skillsToDelete = new HashSet<>(existingSkills);
-	            skillsToDelete.removeAll(new HashSet<>(employeeSkills.getEmployeeSkills()));
-	            if (!skillsToDelete.isEmpty()) {
-	                for (String skill : skillsToDelete) {
-	                    deleteEmployeeSkills(employeeSkills.getEmployeeId(), skill);
-	                }
-	            }
+	        try (Connection connection = DBUtil.getConnection();
+	            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_EMPLOYEESKILL)) {
+	        	preparedStatement.setString(1, String.join(",", employeeSkills.getEmployeeSkills()));
+	        	preparedStatement.setInt(2, employeeSkills.getEmployeeId());
+	        	preparedStatement.executeUpdate();
 	        } catch (SQLException e) {
 	            e.printStackTrace();
 	        }
 	    }
-	
+	   
 	    public Set<String> getEmployeeSkillsByEmployeeId(int employeeId) {
 	        Set<String> employeeSkills = new HashSet<>();
 	        try (Connection connection = DBUtil.getConnection();

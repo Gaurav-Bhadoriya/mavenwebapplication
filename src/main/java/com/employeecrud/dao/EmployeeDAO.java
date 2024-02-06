@@ -25,5 +25,5 @@ public interface EmployeeDAO {
     void updateEmployeeSkills(EmployeeSkills employeeSkills);
  
 	void deleteEmployeeSkills(int employeeId, String skill);
-
+	
 }
